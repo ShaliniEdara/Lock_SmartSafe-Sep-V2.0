@@ -1,0 +1,48 @@
+package com.safesmart.safesmart.scheduler;
+
+import java.time.LocalDate;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import com.safesmart.safesmart.dto.EODReport;
+import com.safesmart.safesmart.service.ReportService;
+import com.safesmart.safesmart.util.EmailTemplate;
+
+@Component
+public class TodayShedular {
+
+	@Autowired
+	private ReportService reportService;
+	
+	@Autowired
+	private EmailTemplate emailTemplate;
+	
+
+	@Scheduled(cron = "0 0/1 * * * ?")
+	public void endOfDayReport() {
+		System.out.println("endOfDayReport "+ LocalDate.now());
+		EODReport eODReport = reportService.endOfDayReport();
+		StringBuilder body = new StringBuilder(" Hi...\n");
+		eODReport.getData().forEach(data->{
+			body.append(data.getName()+"\n");
+			data.getData().forEach(bill->{
+				body.append("Count "+bill.getCount()+"Currency "+bill.getCurrency()+"\n");
+			});
+			body.append( "\n");
+			body.append( "\n");
+		});
+		
+		body.append( "\n");
+		body .append("End of the day Report.\n");
+		emailTemplate.createEndOfDayMail(body);
+	}
+
+	
+	
+
+	
+	
+	
+}
